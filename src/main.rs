@@ -9,5 +9,5 @@ fn main() {
     // Run solvers and output to a nice table.
     TableGen::new("AoC 2022 solutions")
         .add(day01::part1, day01::part2)
-        .run();
+        .run_day(1);
 }
