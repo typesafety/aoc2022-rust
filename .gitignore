@@ -1,1 +1,4 @@
 /target
+
+# Inputs should not be uploaded publicly
+./inputs/
