@@ -2,7 +2,7 @@ use workrange::WorkRange;
 
 pub fn part1() -> i32 {
     const INPUT: &str = include_str!("../../inputs/4.input");
-    let pairs = parse_input(INPUT).unwrap_or_default();
+    let pairs = parse_input(INPUT).unwrap();
 
     pairs
         .iter()
@@ -13,7 +13,7 @@ pub fn part1() -> i32 {
 
 pub fn part2() -> i32 {
     const INPUT: &str = include_str!("../../inputs/4.input");
-    let pairs = parse_input(INPUT).unwrap_or_default();
+    let pairs = parse_input(INPUT).unwrap();
 
     pairs
         .iter()
@@ -71,28 +71,42 @@ fn parse_input(input: &str) -> Result<Vec<(WorkRange, WorkRange)>, ParseError> {
 }
 
 fn parse_row(input: &str) -> Result<(WorkRange, WorkRange), ParseError> {
-    match &input.split(',').collect::<Vec<&str>>()[..] {
+    match input.split(',').collect::<Vec<&str>>()[..] {
         [range1, range2] => {
             let range1 = parse_range(range1)?;
             let range2 = parse_range(range2)?;
             Ok((range1, range2))
         }
-        x => {
-            let err_msg = format!("Failed to parse valid row from input: {x:?}");
+        _ => {
+            let err_msg = format!("Failed to parse valid row from input: '{input}'");
             Err(ParseError::new(err_msg))
         }
     }
 }
 
 fn parse_range(input: &str) -> Result<WorkRange, ParseError> {
-    match &input.split('-').collect::<Vec<&str>>()[..] {
+    match input.split('-').collect::<Vec<&str>>()[..] {
         [start, end] => {
-            let start = start.parse::<i32>()?;
-            let end = end.parse::<i32>()?;
-            Ok(WorkRange::new(start, end))
+            // Explicitly handle Err:s from .parse() since the error otherwise
+            // doesn't contain what was attempted to be parsed.
+            let p = || {
+                let start = start.parse::<i32>()?;
+                let end = end.parse::<i32>()?;
+                Ok::<(i32, i32), ParseError>((start, end))
+            };
+            match p() {
+                Ok((start, end)) => Ok(WorkRange::new(start, end)),
+                Err(e) => {
+                    let err_msg = format!(
+                        "Failed to parse a range from input: '{input}' -- {}",
+                        e.message
+                    );
+                    Err(ParseError::new(err_msg))
+                }
+            }
         }
-        x => {
-            let err_msg = format!("Failed to parse a range from input: {x:?}");
+        _ => {
+            let err_msg = format!("Failed to parse a range from input: '{input}'");
             Err(ParseError::new(err_msg))
         }
     }
@@ -111,7 +125,7 @@ impl ParseError {
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.message)
+        write!(f, "ParseError: {}", self.message)
     }
 }
 
