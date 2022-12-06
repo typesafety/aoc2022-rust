@@ -2,46 +2,22 @@ use std::collections::VecDeque;
 
 pub fn part1() -> i32 {
     const INPUT: &str = include_str!("../../inputs/6.input");
-    const MARKER_LENGTH: usize = 4;
-    let mut buffer: VecDeque<char> = VecDeque::with_capacity(MARKER_LENGTH);
-    let mut count: usize = MARKER_LENGTH + 1;
-    for (ix, c) in INPUT.chars().enumerate() {
-        count -= 1;
-
-        if ix < MARKER_LENGTH {
-            buffer.push_front(c);
-        }
-
-        let mut i = 0;
-        while i < buffer.len() {
-            if c == buffer[i] {
-                break;
-            }
-            i += 1;
-        }
-        let pad = buffer.len() - i;
-
-        count = std::cmp::max(pad, count);
-
-        if count == 0 {
-            return ix as i32;
-        }
-        buffer.pop_back();
-        buffer.push_front(c);
-    }
-    -1
+    solve(4, INPUT).unwrap()
 }
 
 pub fn part2() -> i32 {
     const INPUT: &str = include_str!("../../inputs/6.input");
-    const SEQUENCE_LENGTH: usize = 14;
-    let mut buffer: VecDeque<char> = VecDeque::with_capacity(SEQUENCE_LENGTH);
-    let mut count: usize = SEQUENCE_LENGTH + 1;
-    for (ix, c) in INPUT.chars().enumerate() {
+    solve(14, INPUT).unwrap()
+}
+
+fn solve(marker_length: usize, input: &str) -> Option<i32> {
+    let mut buffer: VecDeque<char> = VecDeque::with_capacity(marker_length);
+    let mut count: usize = marker_length + 1;
+    for (ix, c) in input.chars().enumerate() {
         count -= 1;
 
         if count == 0 {
-            return ix as i32;
+            return Some(ix as i32);
         }
 
         let at = || {
@@ -54,20 +30,20 @@ pub fn part2() -> i32 {
             }
             None
         };
-        let pad = SEQUENCE_LENGTH - at().unwrap_or(SEQUENCE_LENGTH);
+        let pad = marker_length - at().unwrap_or(marker_length);
 
-        if ix < SEQUENCE_LENGTH {
+        if ix < marker_length {
             buffer.push_front(c);
         }
 
-        count = std::cmp::max(pad, count);
+        count = pad.max(count);
 
-        if ix < SEQUENCE_LENGTH {
+        if ix < marker_length {
             continue;
         }
 
         buffer.pop_back();
         buffer.push_front(c);
     }
-    -1
+    None
 }
