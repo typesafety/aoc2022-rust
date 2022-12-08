@@ -5,8 +5,6 @@ use std::vec::Vec;
 pub fn part1() -> i32 {
     const INPUT: &str = include_str!("../../inputs/8.input");
     let grid = &mut parse_grid(INPUT);
-    let height = grid.len();
-    let width = grid[0].len();
 
     (count_from_left(grid)
         + count_from_right(grid)
@@ -16,7 +14,56 @@ pub fn part1() -> i32 {
 
 pub fn part2() -> i32 {
     const INPUT: &str = include_str!("../../inputs/8.input");
-    0
+    let grid = parse_grid(INPUT);
+
+    let mut highest = 0;
+    for row in grid.iter() {
+        for x in row {
+            let score = score(x, &grid);
+            if score > highest {
+                highest = score;
+            }
+        }
+    }
+    highest
+}
+
+fn score(xate: &Xate, grid: &Grid) -> i32 {
+    // Left
+    let mut score_left = 0;
+    for col_ix in (0..xate.x()).rev() {
+        score_left += 1;
+        if grid[xate.y()][col_ix].height >= xate.height {
+            break;
+        }
+    }
+    // Right
+    let mut score_right = 0;
+    for col_ix in (xate.x() + 1)..grid[0].len() {
+        if xate.x() == grid[0].len() - 1 {}
+        score_right += 1;
+        if grid[xate.y()][col_ix].height >= xate.height {
+            break;
+        }
+    }
+    // Up
+    let mut score_up = 0;
+    for row_ix in (0..xate.y()).rev() {
+        score_up += 1;
+        if grid[row_ix][xate.x()].height >= xate.height {
+            break;
+        }
+    }
+    // Down
+    let mut score_down = 0;
+    for row_ix in (xate.y() + 1)..grid.len() {
+        score_down += 1;
+        if grid[row_ix][xate.x()].height >= xate.height {
+            break;
+        }
+    }
+
+    score_left * score_right * score_up * score_down
 }
 
 fn count_from_top(grid: &mut Grid) -> i32 {
